@@ -85,7 +85,7 @@ const TableAdmin: React.FC<TableAdminProps> = ({ data, columns, prop }) => {
   const [tableParams, setTableParams] = useState<TableParams>({
     pagination: {
       current: 1,
-      pageSize: 10,
+      pageSize: 5,
     },
   });
 
@@ -100,11 +100,6 @@ const TableAdmin: React.FC<TableAdminProps> = ({ data, columns, prop }) => {
       sortOrder: Array.isArray(sorter) ? undefined : sorter.order,
       sortField: Array.isArray(sorter) ? undefined : sorter.field,
     });
-
-    // `dataSource` is useless since `pageSize` changed
-    // if (pagination.pageSize !== tableParams.pagination?.pageSize) {
-    //   setData([]);
-    // }
   };
 
   return (
@@ -115,9 +110,9 @@ const TableAdmin: React.FC<TableAdminProps> = ({ data, columns, prop }) => {
         dataSource={data as any}
         pagination={{
           ...tableParams.pagination,
-          total: 300,
+          total: data?.length,
           showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50"],
+          pageSizeOptions: ["5", "20", "50"],
           showTotal: (total, range) =>
             `Hiển thị ${range[0]} đến ${range[1]} trên ${total} kết quả`,
         }}
@@ -127,12 +122,6 @@ const TableAdmin: React.FC<TableAdminProps> = ({ data, columns, prop }) => {
         title={() => (
           <>
             <div className="flex justify-end items-center">
-              {/* <div className="space-x-4 ">
-                <span className="text-[#9f9797]">Thẻ chờ duyệt:</span>
-                <span className="text-[#FAAD14]">1.478</span>
-                <span className="text-[#9f9797]">Thẻ từ chối:</span>
-                <span className="text-red-500">12</span>
-              </div> */}
               <div className="">
                 {prop?.atm && (
                   <Button

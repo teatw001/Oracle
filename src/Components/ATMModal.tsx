@@ -10,13 +10,22 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useAddtheATMMutation } from "../service/theatm.service";
+import { toast } from "react-toastify";
+import { useGetAllAcccontQuery } from "../service/Account.service";
 
 const randomDigits = (length: number) =>
   Array.from({ length }, () => Math.floor(Math.random() * 10)).join("");
 
+const generateRandomMathe = () => `TH${randomDigits(5)}`;
+
 const ATMModal = ({ open, onCancel, onOk }: any) => {
   const [form] = Form.useForm();
   const [addCart, { isLoading }] = useAddtheATMMutation();
+  const { data: getAllmaTK } = useGetAllAcccontQuery();
+
+
+  const currentDate = dayjs();
+  const expiryDate = currentDate.add(3, "year");
 
   const handleSubmit = async () => {
     try {
@@ -26,26 +35,34 @@ const ATMModal = ({ open, onCancel, onOk }: any) => {
         mathe: values.mathe,
         matk: values.matk,
         mapin: values.mapin,
-        ngayphathanh: values.ngayphathanh.format("YYYY-MM-DD"),
-        ngayhethan: values.ngayhethan.format("YYYY-MM-DD"),
-        tinhtrang: values.tinhtrang ? "active" : "inactive",
+        ngayphathanh: currentDate.format("YYYY-MM-DD"),
+        ngayhethan: expiryDate.format("YYYY-MM-DD"),
+        tinhtrang: values.tinhtrang ? "Hoat dong" : "Khoa",
         sothe: randomDigits(16),
         cvv: randomDigits(3),
       };
 
-      const res = await addCart(data).unwrap(); // gọi API và unwrap để bắt lỗi rõ
-      message.success("Tạo thẻ thành công!");
-
+      const res = await addCart(data).unwrap();
+      toast.success("Tạo thẻ thành công!");
       form.resetFields();
-      onOk?.(res); // callback nếu bạn muốn cập nhật UI cha
+      onOk?.(res);
     } catch (err: any) {
       console.error("Lỗi tạo thẻ:", err);
-      message.error("Tạo thẻ thất bại. Vui lòng thử lại!");
+      toast.error("Tạo thẻ thất bại. Vui lòng thử lại!");
     }
   };
 
   useEffect(() => {
-    if (!open) form.resetFields();
+    if (open) {
+      form.setFieldsValue({
+        mathe: generateRandomMathe(),
+        ngayphathanh: currentDate,
+        ngayhethan: expiryDate,
+        tinhtrang: true,
+      });
+    } else {
+      form.resetFields();
+    }
   }, [open]);
 
   return (
@@ -56,20 +73,9 @@ const ATMModal = ({ open, onCancel, onOk }: any) => {
       footer={null}
       centered
     >
-      <Form
-        form={form}
-        layout="vertical"
-        style={{ paddingTop: 12 }}
-        initialValues={{
-          tinhtrang: true,
-        }}
-      >
-        <Form.Item
-          label="Mã thẻ"
-          name="mathe"
-          rules={[{ required: true, message: "Vui lòng nhập mã thẻ" }]}
-        >
-          <Input placeholder="TH001" />
+      <Form form={form} layout="vertical" style={{ paddingTop: 12 }}>
+        <Form.Item label="Mã thẻ" name="mathe" rules={[{ required: true }]}>
+          <Input disabled />
         </Form.Item>
 
         <Form.Item
@@ -85,27 +91,27 @@ const ATMModal = ({ open, onCancel, onOk }: any) => {
           name="mapin"
           rules={[{ required: true, message: "Vui lòng nhập mã PIN" }]}
         >
-          <Input placeholder="1234" />
+          <Input maxLength={6} minLength={6} placeholder="1234" />
         </Form.Item>
 
         <Form.Item
           label="Ngày phát hành"
           name="ngayphathanh"
-          rules={[{ required: true, message: "Chọn ngày phát hành" }]}
+          rules={[{ required: true }]}
         >
-          <DatePicker className="w-full" format="DD/MM/YYYY" />
+          <DatePicker className="w-full" format="DD/MM/YYYY" disabled />
         </Form.Item>
 
         <Form.Item
           label="Ngày hết hạn"
           name="ngayhethan"
-          rules={[{ required: true, message: "Chọn ngày hết hạn" }]}
+          rules={[{ required: true }]}
         >
-          <DatePicker className="w-full" format="DD/MM/YYYY" />
+          <DatePicker className="w-full" format="DD/MM/YYYY" disabled />
         </Form.Item>
 
-        <Form.Item name="tinhtrang" valuePropName="checked">
-          <Checkbox>Thẻ đang hoạt động</Checkbox>
+        <Form.Item name="tinhtrang">
+          <Checkbox>Active</Checkbox>
         </Form.Item>
 
         <div className="flex justify-end gap-2 mt-4">

@@ -3,6 +3,7 @@ import {
   Card,
   DatePicker,
   Input,
+  message,
   Popconfirm,
   Select,
   Space,
@@ -21,12 +22,37 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import LayoutAdmin from "../../Layout";
-import { useFetchtheATMsQuery } from "../../service/theatm.service";
+import {
+  useFetchtheATMsQuery,
+  useRemovetheATMMutation,
+} from "../../service/theatm.service";
+import { toast } from "react-toastify";
+import UpdateAtm from "../../Components/UpdateAtm";
 const { RangePicker } = DatePicker;
 
 const Home = () => {
   const { data: data, isLoading } = useFetchtheATMsQuery();
-  console.log(data);
+  const [removeATM] = useRemovetheATMMutation();
+  const [openUpdate, setOpenUpdate] = React.useState(false);
+  const [selectedATM, setSelectedATM] = React.useState<any>(null);
+  const handleEdit = (record: any) => {
+    setSelectedATM(record);
+    setOpenUpdate(true);
+  };
+  const confirm = async (id: string | number) => {
+    try {
+      await removeATM(id).unwrap();
+      toast.success(`Xóa thẻ thành công!`);
+    } catch (error) {
+      toast.error("Xóa thẻ thất bại!");
+      console.error(error);
+    }
+  };
+
+  // Hàm cancel khi người dùng hủy xóa
+  const cancel = () => {
+    toast.info("Đã hủy xóa thẻ");
+  };
   const columnsCard = [
     {
       title: "STT",
@@ -50,7 +76,7 @@ const Home = () => {
       title: "Mã PIN",
       dataIndex: "MAPIN",
       key: "MAPIN",
-      render: (pin: string) => "******", // Ẩn vì lý do bảo mật
+      render: (pin: string) => "******",
     },
     {
       title: "Ngày Phát Hành",
@@ -69,7 +95,7 @@ const Home = () => {
       dataIndex: "SOTHE",
       key: "SOTHE",
       render: (so: string) =>
-        so.length >= 4 ? `**** **** **** ${so.slice(-4)}` : so,
+        so?.length >= 4 ? `**** **** **** ${so.slice(-4)}` : so,
     },
     {
       title: "CVV",
@@ -94,7 +120,7 @@ const Home = () => {
           <Tooltip title="Sửa">
             <Button
               icon={<EditOutlined />}
-              // onClick={() => handleEdit(record)}
+              onClick={() => handleEdit(record)}
               type="text"
             />
           </Tooltip>
@@ -136,6 +162,11 @@ const Home = () => {
           </Card>
         </div>
       </div>
+      <UpdateAtm
+        open={openUpdate}
+        onCancel={() => setOpenUpdate(false)}
+        data={selectedATM}
+      />
     </>
   );
 };

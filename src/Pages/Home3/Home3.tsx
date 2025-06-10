@@ -31,6 +31,7 @@ import {
   useRemovenhanVienMutation,
 } from "../../service/nhanvien.service";
 import Update from "../../Components/Update";
+import { toast } from "react-toastify";
 const { RangePicker } = DatePicker;
 
 const Home3 = () => {
@@ -47,17 +48,24 @@ const Home3 = () => {
   const confirm = async (id: string | number) => {
     try {
       await removeNhanVien(id).unwrap();
-      message.success(`Xóa nhân viên thành công!`);
+      toast.success(`Xóa nhân viên thành công!`);
     } catch (error) {
-      message.error("Xóa nhân viên thất bại!");
+      toast.error("Xóa nhân viên thất bại!");
       console.error(error);
     }
   };
 
   // Hàm cancel khi người dùng hủy xóa
   const cancel = () => {
-    message.info("Đã hủy xóa nhân viên");
+    toast.info("Đã hủy xóa nhân viên");
   };
+  const randomTrangThai = () => {
+    return Math.random() < 0.5 ? "Làm việc" : "Thôi Việc";
+  };
+  const processedData = ((data as any)?.data || []).map((nv: any) => ({
+    ...nv,
+    trangThai: nv.trangThai || randomTrangThai(),
+  }));
   const columnsnv = [
     {
       title: "STT",
@@ -124,7 +132,7 @@ const Home3 = () => {
       key: "trangThai",
       render: (text: string) => (
         <Tag
-          color={text === "Đang làm" ? "green" : "red"}
+          color={text === "Làm việc" ? "green" : "red"}
           className="rounded-md px-3 py-1 text-sm"
         >
           {text}
@@ -183,7 +191,7 @@ const Home3 = () => {
         <div>
           <Card>
             <TableAdmin
-              data={(data as any)?.data}
+              data={processedData}
               columns={columnsnv as any}
               prop={{ nhanvien: true }}
             />

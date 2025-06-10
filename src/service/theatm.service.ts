@@ -23,6 +23,14 @@ const theATMsAPI = createApi({
       }),
       invalidatesTags: ["theATM"],
     }),
+    gettheATMKH: builder.mutation({
+      query: (theATMs: any) => ({
+        url: "/theatm/list-atm",
+        method: "POST",
+        body: theATMs,
+      }),
+      invalidatesTags: ["theATM"],
+    }),
 
     removetheATM: builder.mutation({
       query: (id) => ({
@@ -31,14 +39,24 @@ const theATMsAPI = createApi({
       }),
       invalidatesTags: ["theATM"],
     }),
+    updatetheATM: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/theATM/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["theATM"],
+    }),
   }),
 });
 export const {
   useAddtheATMMutation,
-
+  useRemovetheATMMutation,
   useFetchtheATMsQuery,
-
+  useUpdatetheATMMutation,
   useGettheATMByIdQuery,
+  useGettheATMKHMutation,
+ 
 } = theATMsAPI;
 export const theATMReducer = theATMsAPI.reducer;
 export default theATMsAPI;

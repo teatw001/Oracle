@@ -11,10 +11,12 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, Breadcrumb, Card, Layout, Menu, theme } from "antd";
+import { Avatar, Breadcrumb, Card, Dropdown, Layout, Menu, theme } from "antd";
 import TableAdmin from "../Components/Table";
 import Home from "../Pages/QlTheATM/Home";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { getUser } from "../Pages/Login/utils/auth";
+import { toast } from "react-toastify";
 
 const { Header, Content, Sider } = Layout;
 
@@ -38,17 +40,115 @@ function getItem(
 }
 
 const LayoutAdmin: React.FC = () => {
+  const user = getUser();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const items: MenuItem[] = [
-    getItem("Quản lý thẻ ATM", "/home", <LineChartOutlined />),
-    // getItem("Option 2", "/home2", <BankOutlined />),
-    getItem("Quản lý nhân viên", "/home3", <UserOutlined />),
+  const breadcrumbNameMap: Record<string, string> = {
+    "/home": "Quản lý thẻ ATM",
+    "/home3": "Quản lý nhân viên",
+    "/atmKH": "Danh sách thẻ ATM của Khách hàng",
+    "/addAccount": "Thêm mới tài khoản",
+    "/listAtm": "Thẻ của tôi",
+  };
+  const location = useLocation();
+  const pathSnippets = location.pathname.split("/").filter((i) => i);
+  const breadcrumbItems = [
+    {
+      title: "Home",
+    },
+    ...(pathSnippets.length
+      ? [
+          {
+            title: breadcrumbNameMap[`/${pathSnippets[0]}`] || pathSnippets[0],
+          },
+        ]
+      : []),
   ];
+
+  const items: MenuItem[] = [
+    user?.role === "personnel" &&
+      getItem("Quản lý thẻ ATM", "/home", <LineChartOutlined />),
+
+    user?.role === "personnel" &&
+      getItem("Quản lý nhân viên", "/home3", <UserOutlined />),
+
+    user?.role === "personnel" &&
+      getItem(
+        "List ATM theo KH",
+        "/atmKH",
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="size-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+          />
+        </svg>
+      ),
+    user?.role !== "personnel" &&
+      getItem(
+        "Thẻ của tôi",
+        "/listAtm",
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="size-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+          />
+        </svg>
+      ),
+    user?.role === "personnel" &&
+      getItem("Thêm mới Account", "/addAccount", <UserOutlined />),
+  ].filter(Boolean) as MenuItem[];
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const itemss: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <div className="grid border-b p-3 text-center">
+          <span>{user ? user?.HOTEN : "Admin"}</span>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: <span>Setting</span>,
+      disabled: true,
+    },
 
+    {
+      key: "4",
+      danger: true,
+      label: (
+        <button
+          onClick={() => {
+            toast.success("Đăng xuất thành công!");
+            navigate("/login");
+            localStorage.clear();
+          }}
+        >
+          {" "}
+          Đăng xuất
+        </button>
+      ),
+    },
+  ];
   return (
     <Layout>
       <header className="bg-white  flex text-center items-center justify-between p-4">
@@ -61,13 +161,15 @@ const LayoutAdmin: React.FC = () => {
           </h1>
         </div>
         <div className="">
-          <div className="items-center flex text-center bg-[#F5F5F5] p-2 px-6 rounded-lg">
-            <Avatar
-              style={{ backgroundColor: "#87d068" }}
-              icon={<UserOutlined />}
-            />
-            <h4 className="px-4">Admin</h4>
-          </div>
+          <Dropdown menu={{ items: itemss }}>
+            <div className="items-center flex text-center bg-[#F5F5F5] p-2 px-6 rounded-lg">
+              <Avatar
+                style={{ backgroundColor: "#87d068" }}
+                icon={<UserOutlined />}
+              />
+              <h4 className="px-4">{user?.HOTEN}</h4>
+            </div>
+          </Dropdown>
         </div>
       </header>
       <Layout>
@@ -90,10 +192,8 @@ const LayoutAdmin: React.FC = () => {
           />
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
-          <Breadcrumb
-            items={[{ title: "Home" }, { title: "Quản lý thẻ ATM" }]}
-            style={{ margin: "16px 0" }}
-          />
+          <Breadcrumb items={breadcrumbItems} style={{ margin: "16px 0" }} />
+
           <Content
             style={{
               margin: 0,

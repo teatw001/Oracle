@@ -30,7 +30,10 @@ const usersAPI = createApi({
       }),
       invalidatesTags: ["user"],
     }),
-
+    getAllAcccont: builder.query<any[], void>({
+      query: () => "/accounts",
+      providesTags: ["user"],
+    }),
     loginUser: builder.mutation({
       query: (credentials: { taikhoan: string; matkhau: string }) => ({
         url: "/accounts/login",
@@ -39,13 +42,22 @@ const usersAPI = createApi({
       }),
       invalidatesTags: ["user"],
     }),
+    addAccount: builder.mutation({
+      query: (user: any) => ({
+        url: "/accounts",
+        method: "POST",
+        body: user,
+      }),
+      invalidatesTags: ["user"],
+    }),
   }),
 });
 export const {
   useAddUserMutation,
   useLoginUserMutation,
+  useAddAccountMutation,
   useFetchUsersQuery,
-
+  useGetAllAcccontQuery,
   useRemoveUserMutation,
   useGetUserByIdQuery,
 } = usersAPI;

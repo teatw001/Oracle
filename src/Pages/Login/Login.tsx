@@ -3,6 +3,7 @@ import { Button, Checkbox, DatePicker, Form, Input, message } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useLoginUserMutation } from "../../service/Account.service";
+import { toast } from "react-toastify";
 type FieldType = {
   name?: string;
   password?: string;
@@ -22,17 +23,14 @@ const Login = () => {
       console.log(response);
 
       if ((response as any)?.data?.Code == 200) {
-        // localStorage.setItem("authToken", (response as any).data.token);
-        // localStorage.setItem("Role", (response as any).data.user.role);
-        // localStorage.setItem(
-        //   "user",
-        //   JSON.stringify((response as any)?.data.user)
-        // );
-
-        message.success("Đăng nhập thành công!");
+        toast.success("Đăng nhập thành công!");
+        localStorage.setItem(
+          "user",
+          JSON.stringify((response as any)?.data?.Data)
+        );
         navigate("/");
       } else {
-        message.error("Sai tên tài khoản hoặc mật khẩu không đúng");
+        toast.error("Sai tên tài khoản hoặc mật khẩu không đúng");
       }
     } catch (error) {
       alert(`Đã xảy ra lỗi: ${error}`);

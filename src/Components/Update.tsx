@@ -3,13 +3,15 @@ import React, { useEffect } from "react";
 import { Modal, Input, DatePicker, Button, Form, message } from "antd";
 import dayjs from "dayjs";
 import { useUpdateNhanVienMutation } from "../service/nhanvien.service";
+import { toast } from "react-toastify";
 
 const Update = ({ open, onCancel, data }: any) => {
   const [form] = Form.useForm();
   console.log(data);
 
   const [updateStaff] = useUpdateNhanVienMutation();
-
+  const randomDigits = (length: number) =>
+    Array.from({ length }, () => Math.floor(Math.random() * 10)).join("");
   useEffect(() => {
     if (data) {
       form.setFieldsValue({
@@ -34,12 +36,12 @@ const Update = ({ open, onCancel, data }: any) => {
 
       await updateStaff({ id: data.MANV, ...updatedStaff }).unwrap();
 
-      message.success("Cập nhật nhân viên thành công!");
+      toast.success("Cập nhật nhân viên thành công!");
       form.resetFields();
       onCancel();
     } catch (err) {
       console.error(err);
-      message.error("Lỗi khi cập nhật nhân viên!");
+      toast.error("Lỗi khi cập nhật nhân viên!");
     }
   };
 

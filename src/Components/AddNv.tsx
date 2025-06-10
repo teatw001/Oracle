@@ -1,8 +1,9 @@
 // ATMModal.tsx
 import React from "react";
-import { Modal, Input, DatePicker, Button, Form, message } from "antd";
+import { Modal, Input, DatePicker, Button, Form, message, Radio } from "antd";
 import dayjs from "dayjs";
 import { useAddnhanVienMutation } from "../service/nhanvien.service";
+import { toast } from "react-toastify";
 
 const AddNv = ({ open, onCancel }: any) => {
   const [form] = Form.useForm();
@@ -15,11 +16,11 @@ const AddNv = ({ open, onCancel }: any) => {
         ngaysinh: values.ngaysinh.format("YYYY-MM-DD"),
       };
       await addStaff(newStaff).unwrap();
-      message.success("Thêm nhân viên thành công!");
+      toast.success("Thêm nhân viên thành công!");
       form.resetFields();
       onCancel(); // đóng modal
     } catch (err) {
-      message.error("Lỗi khi thêm nhân viên!");
+      toast.error("Lỗi khi thêm nhân viên!");
     }
   };
 
@@ -79,7 +80,10 @@ const AddNv = ({ open, onCancel }: any) => {
         </Form.Item>
 
         <Form.Item label="Chức vụ:" name="chucvu" rules={[{ required: true }]}>
-          <Input />
+          <Radio.Group>
+            <Radio value="Staff">Nhân viên</Radio>
+            {/* <Radio value="Custumer">Khách hàng</Radio> */}
+          </Radio.Group>
         </Form.Item>
 
         <Form.Item
